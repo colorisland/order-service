@@ -1,0 +1,18 @@
+package com.assignment.order_service.dto;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.List;
+
+@Getter
+@Setter
+public class OrderRequest {
+    private List<Item> items;
+
+    @Getter @Setter
+    public static class Item {
+        private Long productId;
+        private int quantity;
+    }
+}
