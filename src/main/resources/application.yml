@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: order-service
+
+  h2:
+    console:
+      enabled: true       # H2 DB 콘솔 사용
+
+  datasource:
+    url: jdbc:h2:mem:testdb # 메모리 DB사용. jdbc:h2:~/testdb 를 하면 파일에 생성가능
+    driver-class-name: org.h2.Driver
+    username: sa # 기본 이름
+    password: # 패스워드 사용안함
+
+  jpa:
+    hibernate:
+      ddl-auto: create # DDL 자동 생성
+    show-sql: true # SQL 콘솔에 로그 찍음
+    defer-datasource-initialization: true # JPA 먼저 초기화
