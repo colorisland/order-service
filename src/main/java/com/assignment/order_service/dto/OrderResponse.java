@@ -20,5 +20,6 @@ public class OrderResponse {
         private Long productId;
         private int quantity;
         private int discountedPrice;
+        private int totalPrice;
     }
 }
