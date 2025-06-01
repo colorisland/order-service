@@ -1,5 +1,6 @@
 package com.assignment.order_service.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,7 +9,12 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class CancelResponse {
+    @Schema(description = "상품 아이디")
     private Long productId;
+
+    @Schema(description = "환불 금액")
     private int refundAmount;
-    private int remainingOrderTotal;
+
+    @Schema(description = "취소 후 남은 금액")
+    private int remainingAmount;
 }

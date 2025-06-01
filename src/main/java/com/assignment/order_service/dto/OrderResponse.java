@@ -11,12 +11,12 @@ import java.util.List;
 @AllArgsConstructor
 public class OrderResponse {
     private Long orderId;
-    private List<ItemDetail> items;
+    private List<Item> items;
     private int totalAmount;
 
     @Getter @Setter
     @AllArgsConstructor
-    public static class ItemDetail {
+    public static class Item {
         private Long productId;
         private int quantity;
         private int discountedPrice;
