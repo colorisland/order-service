@@ -17,3 +17,8 @@ spring:
       ddl-auto: create # DDL 자동 생성
     show-sql: true # SQL 콘솔에 로그 찍음
     defer-datasource-initialization: true # JPA 먼저 초기화
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

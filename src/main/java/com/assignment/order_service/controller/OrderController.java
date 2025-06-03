@@ -1,9 +1,11 @@
 package com.assignment.order_service.controller;
 
 import com.assignment.order_service.dto.*;
+import com.assignment.order_service.exception.SuccessCode;
 import com.assignment.order_service.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,8 +22,9 @@ public class OrderController {
      * @return
      */
     @PostMapping
-    public ResponseEntity<OrderResponse> createOrder(@RequestBody @Valid OrderRequest request) {
-        return ResponseEntity.ok(orderService.createOrder(request));
+    public ResponseEntity<ApiResponse<OrderResponse>> createOrder(@RequestBody @Valid OrderRequest request) {
+        OrderResponse orderResponse = orderService.createOrder(request);
+        return ResponseEntity.ok(ApiResponse.success(SuccessCode.ORDER_CREATED, orderResponse));
     }
 
     /**

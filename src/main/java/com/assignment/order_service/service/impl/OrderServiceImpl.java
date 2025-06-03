@@ -6,6 +6,8 @@ import com.assignment.order_service.domain.Product;
 import com.assignment.order_service.domain.repository.OrderRepository;
 import com.assignment.order_service.domain.repository.ProductRepository;
 import com.assignment.order_service.dto.*;
+import com.assignment.order_service.exception.BusinessException;
+import com.assignment.order_service.exception.ErrorCode;
 import com.assignment.order_service.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,7 +35,9 @@ public class OrderServiceImpl implements OrderService {
         int totalAmount = 0;
 
         for (OrderRequest.Item item : request.getItems()) {
-            Product product = productRepository.findById(item.getProductId()).orElseThrow();
+            // 상품 정보를 가져온다. 존재하지 않는 상품은 예외 처리.
+            Product product = productRepository.findById(item.getProductId())
+                    .orElseThrow(()->new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
 
             // 재고 차감
             product.setStockQuantity(product.getStockQuantity() - item.getQuantity());
