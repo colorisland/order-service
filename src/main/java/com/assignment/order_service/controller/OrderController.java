@@ -30,14 +30,15 @@ public class OrderController {
     /**
      * 주문 상품 개별 취소
      * @param orderId
-     * @param request
+     * @param cancelRequest
      * @return
      */
     @PostMapping("/{orderId}/cancel")
-    public ResponseEntity<CancelResponse> cancelOrderItem(
+    public ResponseEntity<ApiResponse<CancelResponse>> cancelOrderItem(
             @PathVariable Long orderId,
-            @RequestBody @Valid CancelRequest request) {
-        return ResponseEntity.ok(orderService.cancelOrderItem(orderId, request));
+            @RequestBody @Valid CancelRequest cancelRequest) {
+        CancelResponse cancelResponse = orderService.cancelOrderItem(orderId, cancelRequest);
+        return ResponseEntity.ok(ApiResponse.success(SuccessCode.ORDER_CANCELLED,cancelResponse));
     }
 
     /**
@@ -46,7 +47,8 @@ public class OrderController {
      * @return
      */
     @GetMapping("/{orderId}")
-    public ResponseEntity<OrderDetailResponse> getOrderDetails(@PathVariable Long orderId) {
-        return ResponseEntity.ok(orderService.getOrderDetails(orderId));
+    public ResponseEntity<ApiResponse<OrderDetailResponse>> getOrderDetails(@PathVariable Long orderId) {
+        OrderDetailResponse orderDetailResponse = orderService.getOrderDetails(orderId);
+        return ResponseEntity.ok(ApiResponse.success(SuccessCode.ORDER_DETAILS_FETCHED,orderDetailResponse));
     }
 }

@@ -79,14 +79,66 @@ public class OrderServiceImpl implements OrderService {
         return new OrderResponse(savedOrder.getId(), responseItems, totalAmount);
     }
 
+    /**
+     * 주문 상품 개별 취소
+     * @param orderId
+     * @param cancelRequest
+     * @return
+     */
     @Override
     @Transactional
-    public CancelResponse cancelOrderItem(Long orderId, CancelRequest request) {
-        return null;
+    public CancelResponse cancelOrderItem(Long orderId, CancelRequest cancelRequest) {
+        // 주문 조회
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
+
+        // 주문 항목 조회
+        OrderItem orderItem = order.getOrderItems().stream()
+                .filter(i -> i.getId().equals(cancelRequest.getProductId()))
+                .findFirst()
+                .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        // 이미 취소된 경우
+        if (orderItem.isCancelled()) {
+            throw new BusinessException(ErrorCode.ALREADY_CANCELLED);
+        }
+
+        // 환불 처리
+        orderItem.setCancelled(true);
+
+        // 재고 원복
+        Product product = orderItem.getProduct();
+        product.setStockQuantity(product.getStockQuantity() + orderItem.getQuantity());
+
+        // 총 주문 금액에서 환불 금액 차감
+        int refundAmount = orderItem.getTotalPrice();
+        int remainingTotal = order.getOrderItems().stream()
+                .filter(i -> !i.isCancelled())
+                .mapToInt(OrderItem::getTotalPrice)
+                .sum();
+
+        return new CancelResponse(orderItem.getId(), refundAmount, remainingTotal);
     }
 
     @Override
     public OrderDetailResponse getOrderDetails(Long orderId) {
-        return null;
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
+
+        List<OrderDetailResponse.ItemDetail> items = order.getOrderItems().stream()
+                .map(i -> new OrderDetailResponse.ItemDetail(
+                        i.getProduct().getId(),
+                        i.getQuantity(),
+                        i.getDiscountedPrice(),
+                        i.isCancelled()
+                ))
+                .toList();
+
+        int totalAmount = order.getOrderItems().stream()
+                .filter(i -> !i.isCancelled())
+                .mapToInt(OrderItem::getTotalPrice)
+                .sum();
+
+        return new OrderDetailResponse(orderId,items, totalAmount);
     }
 }
