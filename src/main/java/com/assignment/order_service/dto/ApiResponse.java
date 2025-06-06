@@ -2,6 +2,7 @@ package com.assignment.order_service.dto;
 
 import com.assignment.order_service.exception.ErrorCode;
 import com.assignment.order_service.exception.SuccessCode;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,9 +14,16 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "공통 Response Body")
 public class ApiResponse<T> {
+
+    @Schema(description = "응답 코드", example = "ORDER_CREATED")
     private String resultCode;
+
+    @Schema(description = "응답 메세지", example = "주문이 성공적으로 생성되었습니다.")
     private String resultMessage;
+
+    @Schema(description = "응답 본문 데이터")
     private T resultData;
 
     /**
