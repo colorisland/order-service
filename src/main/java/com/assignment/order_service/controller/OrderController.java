@@ -28,19 +28,7 @@ public class OrderController {
      * @return
      */
     @PostMapping
-    @Operation(summary = "주문 생성", description = "상품 ID와 수량 리스트를 받아 주문을 생성합니다.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "주문 생성 성공",
-                            content = @Content(schema = @Schema(implementation = BusinessResponse.class))
-                    ),
-                    @ApiResponse(
-                            responseCode = "400",
-                            description = "잘못된 요청",
-                            content = @Content(schema = @Schema(implementation = BusinessResponse.class))
-                    )
-            })
+    @Operation(summary = "주문 생성", description = "상품 ID와 수량 리스트를 받아 주문을 생성합니다.")
     public ResponseEntity<BusinessResponse<OrderResponse>> createOrder(@RequestBody @Valid OrderRequest request) {
         OrderResponse orderResponse = orderService.createOrder(request);
         return ResponseEntity.ok(BusinessResponse.success(SuccessCode.ORDER_CREATED, orderResponse));

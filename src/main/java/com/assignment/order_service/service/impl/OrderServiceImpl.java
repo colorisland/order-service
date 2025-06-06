@@ -32,42 +32,59 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public OrderResponse createOrder(OrderRequest request) {
         List<OrderItem> orderItems = new ArrayList<>();
-        int totalAmount = 0;
 
+        // 전체 주문 금액.
+        int orderTotalAmount = 0;
+
+        // 요청 상품 리스트 순회하면서 orderItem 객체 생성.
         for (OrderRequest.Item item : request.getItems()) {
             // 상품 정보를 가져온다. 존재하지 않는 상품은 예외 처리.
             Product product = productRepository.findById(item.getProductId())
                     .orElseThrow(()->new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
 
+            // 재고 부족 예외 처리
+            if (product.getStockQuantity() < item.getQuantity()) {
+                throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
+            }
+
             // 재고 차감
             product.setStockQuantity(product.getStockQuantity() - item.getQuantity());
 
+            // 할인가 계산
             int discountedPrice = product.getPrice() - product.getDiscountAmount();
+
+            // 해당 상품의 실구매금액 계산.
             int totalPrice = discountedPrice * item.getQuantity();
 
+            // 주문 아이템 생성.
             OrderItem orderItem = OrderItem.builder()
-                    .product(product)
+                    .product(product) // 상품 관계 설정.
                     .quantity(item.getQuantity())
                     .discountedPrice(discountedPrice)
                     .totalPrice(totalPrice)
                     .isCancelled(false)
                     .build();
 
+            // orderItems 에 추가.
             orderItems.add(orderItem);
-            totalAmount += totalPrice;
+            orderTotalAmount += totalPrice;
         }
 
+        // 주문 객체 설정.
         Order order = Order.builder()
                 .createdAt(LocalDateTime.now())
                 .orderItems(orderItems)
                 .build();
 
+        // 주문 아이템에 주문 설정.
         for (OrderItem item : orderItems) {
             item.setOrder(order);  // 양방향 연관관계 설정
         }
 
+        // 주문, 주문아이템 생성하고 결과 반환.
         Order savedOrder = orderRepository.save(order);
 
+        // Response DTO 설정
         List<OrderResponse.Item> responseItems = orderItems.stream()
                 .map(i -> new OrderResponse.Item(
                         i.getProduct().getId(),
@@ -76,7 +93,7 @@ public class OrderServiceImpl implements OrderService {
                         i.getTotalPrice()))
                 .toList();
 
-        return new OrderResponse(savedOrder.getId(), responseItems, totalAmount);
+        return new OrderResponse(savedOrder.getId(), responseItems, orderTotalAmount);
     }
 
     /**
