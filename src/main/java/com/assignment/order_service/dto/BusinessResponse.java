@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "공통 Response Body")
-public class ApiResponse<T> {
+public class BusinessResponse<T> {
 
     @Schema(description = "응답 코드", example = "ORDER_CREATED")
     private String resultCode;
@@ -33,8 +33,8 @@ public class ApiResponse<T> {
      * @return
      * @param <T>
      */
-    public static <T> ApiResponse<T> success(SuccessCode code, T resultData) {
-        return new ApiResponse<>(code.name(), code.getMessage(), resultData);
+    public static <T> BusinessResponse<T> success(SuccessCode code, T resultData) {
+        return new BusinessResponse<>(code.name(), code.getMessage(), resultData);
     }
 
     /**
@@ -43,8 +43,8 @@ public class ApiResponse<T> {
      * @return
      * @param <T>
      */
-    public static <T> ApiResponse<T> success(SuccessCode code) {
-        return new ApiResponse<>(code.name(), code.getMessage(),null);
+    public static <T> BusinessResponse<T> success(SuccessCode code) {
+        return new BusinessResponse<>(code.name(), code.getMessage(),null);
     }
 
 
@@ -53,8 +53,8 @@ public class ApiResponse<T> {
      * @param code
      * @return
      */
-    public static ApiResponse<Void> fail(ErrorCode code) {
-        return new ApiResponse<>(code.name(), code.getMessage(), null);
+    public static BusinessResponse<Void> fail(ErrorCode code) {
+        return new BusinessResponse<>(code.name(), code.getMessage(), null);
     }
 
 }
