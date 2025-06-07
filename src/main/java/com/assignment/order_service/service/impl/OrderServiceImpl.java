@@ -63,8 +63,8 @@ public class OrderServiceImpl implements OrderService {
             OrderItem orderItem = OrderItem.builder()
                     .product(product) // 상품 관계 설정.
                     .quantity(item.getQuantity())
-                    .discountedPrice(discountedPrice)
-                    .totalPrice(totalDiscountedPrice)
+                    .totalDiscountedPrice(totalDiscountedPrice)
+                    .totalPrice(totalPrice)
                     .isCancelled(false)
                     .build();
 
@@ -92,7 +92,7 @@ public class OrderServiceImpl implements OrderService {
                 .map(i -> new OrderResponse.Item(
                         i.getProduct().getId(),
                         i.getQuantity(),
-                        i.getDiscountedPrice(),
+                        i.getTotalDiscountedPrice(),
                         i.getTotalPrice()))
                 .toList();
 
@@ -149,7 +149,7 @@ public class OrderServiceImpl implements OrderService {
                 .map(i -> new OrderDetailResponse.ItemDetail(
                         i.getProduct().getId(),
                         i.getQuantity(),
-                        i.getDiscountedPrice(),
+                        i.getTotalDiscountedPrice(),
                         i.isCancelled()
                 ))
                 .toList();

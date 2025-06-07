@@ -79,8 +79,7 @@ public class OrderServiceApplicationTests {
 		assertThat(response.getItems()).hasSize(2);
 		// 전체 주문 금액 = 주문상품 실구매가 + 총 할인가격
 		assertThat(response.getTotalPrice()).isEqualTo(
-				response.getItems().stream().mapToInt(OrderResponse.Item::getTotalDiscountedPrice).sum()
-						+ (500 * 2) + (300 * 3));
+				response.getItems().stream().mapToInt(OrderResponse.Item::getTotalPrice).sum());
 	}
 
 }

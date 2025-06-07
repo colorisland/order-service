@@ -32,9 +32,9 @@ public class OrderItem {
     @Schema(description = "수량")
     private int quantity;
     
-    @Column(name = "discounted_price")
+    @Column(name = "total_discounted_price")
     @Schema(description = "할인가격")
-    private int discountedPrice;
+    private int totalDiscountedPrice;
 
     @Column(name = "total_price")
     @Schema(description = "전체 가격")

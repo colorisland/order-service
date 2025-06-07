@@ -33,10 +33,13 @@ public class OrderResponse {
         @Schema(description = "주문 수량")
         private int quantity;
 
-        @Schema(description = "할인 적용된 단가(실 구매금액)", example = "7000")
-        private int discountedPrice;
+//        @Schema(description = "할인 적용된 단가(실 구매금액)", example = "7000")
+//        private int discountedPrice;
 
-        @Schema(description = "전체 구매 금액", example = "14000")
+        @Schema(description = "전체 구매 금액(실 구매금액)", example = "14000")
         private int totalDiscountedPrice;
+
+        @Schema(description = "전체 구매 금액(판매 금액)", example = "14000")
+        private int totalPrice;
     }
 }
