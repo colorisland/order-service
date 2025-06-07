@@ -34,7 +34,7 @@ public class OrderServiceImpl implements OrderService {
         List<OrderItem> orderItems = new ArrayList<>();
 
         // 전체 주문 금액.
-        int orderTotalAmount = 0;
+        int orderTotalPrice = 0;
 
         // 요청 상품 리스트 순회하면서 orderItem 객체 생성.
         for (OrderRequest.Item item : request.getItems()) {
@@ -53,21 +53,24 @@ public class OrderServiceImpl implements OrderService {
             // 할인가 계산
             int discountedPrice = product.getPrice() - product.getDiscountAmount();
 
-            // 해당 상품의 실구매금액 계산.
-            int totalPrice = discountedPrice * item.getQuantity();
+            // 전체 할인가 계산
+            int totalDiscountedPrice = discountedPrice * item.getQuantity();
+
+            // 해당 상품의 할인적용 안된 판매가격으로 계산.
+            int totalPrice = product.getPrice() * item.getQuantity();
 
             // 주문 아이템 생성.
             OrderItem orderItem = OrderItem.builder()
                     .product(product) // 상품 관계 설정.
                     .quantity(item.getQuantity())
                     .discountedPrice(discountedPrice)
-                    .totalPrice(totalPrice)
+                    .totalPrice(totalDiscountedPrice)
                     .isCancelled(false)
                     .build();
 
             // orderItems 에 추가.
             orderItems.add(orderItem);
-            orderTotalAmount += totalPrice;
+            orderTotalPrice += totalPrice;
         }
 
         // 주문 객체 설정.
@@ -93,7 +96,7 @@ public class OrderServiceImpl implements OrderService {
                         i.getTotalPrice()))
                 .toList();
 
-        return new OrderResponse(savedOrder.getId(), responseItems, orderTotalAmount);
+        return new OrderResponse(savedOrder.getId(), responseItems, orderTotalPrice);
     }
 
     /**

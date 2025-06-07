@@ -37,6 +37,6 @@ public class OrderResponse {
         private int discountedPrice;
 
         @Schema(description = "전체 구매 금액", example = "14000")
-        private int totalPrice;
+        private int totalDiscountedPrice;
     }
 }

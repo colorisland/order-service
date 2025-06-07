@@ -4,7 +4,6 @@ import com.assignment.order_service.domain.repository.ProductRepository;
 import com.assignment.order_service.dto.OrderRequest;
 import com.assignment.order_service.dto.OrderResponse;
 import com.assignment.order_service.service.OrderService;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,14 +45,19 @@ public class OrderServiceApplicationTests {
 		// then
 		// 주문 결과는 null 이 아니어야함.
 		assertThat(response).isNotNull();
-		//
+		// 주문 결과의 상품 리스트 1개.
 		assertThat(response.getItems()).hasSize(1);
-		assertThat(response.getTotalPrice()).isEqualTo((800 - 100) * quantity);
+		// 전체가격 계산.
+		assertThat(response.getTotalPrice()).isEqualTo((800) * quantity);
 
+		// 상품 인스턴스 확인.
 		OrderResponse.Item orderItem = response.getItems().get(0);
+		// 주문한 상품 번호 확인.
 		assertThat(orderItem.getProductId()).isEqualTo(productId);
+		// 수량 확인.
 		assertThat(orderItem.getQuantity()).isEqualTo(quantity);
-		assertThat(orderItem.getDiscountedPrice()).isEqualTo(700);
+		// 상품의 실구매 가격 확인.
+		assertThat(orderItem.getTotalDiscountedPrice()).isEqualTo((700) * quantity);
 	}
 
 	@Test
@@ -69,11 +73,14 @@ public class OrderServiceApplicationTests {
 		OrderResponse response = orderService.createOrder(request);
 
 		// then
+		// 주문 생성응답이 null 이 아니다.
 		assertThat(response).isNotNull();
+		// 주문상품 리스트 크기 == 2.
 		assertThat(response.getItems()).hasSize(2);
+		// 전체 주문 금액 = 주문상품 실구매가 + 총 할인가격
 		assertThat(response.getTotalPrice()).isEqualTo(
-				(4200 - 500) * 2 + (3500 - 300) * 3 //  7400 + 9600 = 17000
-		);
+				response.getItems().stream().mapToInt(OrderResponse.Item::getTotalDiscountedPrice).sum()
+						+ (500 * 2) + (300 * 3));
 	}
 
 }
