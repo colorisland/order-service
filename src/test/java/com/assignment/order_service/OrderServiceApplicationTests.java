@@ -3,7 +3,7 @@ package com.assignment.order_service;
 import com.assignment.order_service.domain.repository.ProductRepository;
 import com.assignment.order_service.dto.*;
 import com.assignment.order_service.exception.BusinessException;
-import com.assignment.order_service.exception.ErrorCode;
+import com.assignment.order_service.enums.ErrorCode;
 import com.assignment.order_service.service.OrderService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

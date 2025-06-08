@@ -1,5 +1,6 @@
 package com.assignment.order_service.exception;
 
+import com.assignment.order_service.enums.ErrorCode;
 import lombok.Getter;
 
 @Getter

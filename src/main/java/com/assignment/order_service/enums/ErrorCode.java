@@ -1,4 +1,4 @@
-package com.assignment.order_service.exception;
+package com.assignment.order_service.enums;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;

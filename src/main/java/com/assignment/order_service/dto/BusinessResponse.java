@@ -1,7 +1,7 @@
 package com.assignment.order_service.dto;
 
-import com.assignment.order_service.exception.ErrorCode;
-import com.assignment.order_service.exception.SuccessCode;
+import com.assignment.order_service.enums.ErrorCode;
+import com.assignment.order_service.enums.SuccessCode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

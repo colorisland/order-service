@@ -1,12 +1,9 @@
 package com.assignment.order_service.controller;
 
 import com.assignment.order_service.dto.*;
-import com.assignment.order_service.exception.SuccessCode;
+import com.assignment.order_service.enums.SuccessCode;
 import com.assignment.order_service.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
