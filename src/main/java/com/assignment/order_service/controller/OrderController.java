@@ -55,7 +55,7 @@ public class OrderController {
      * @return
      */
     @GetMapping("/{orderId}")
-    public ResponseEntity<BusinessResponse<OrderDetailResponse>> getOrderDetails(@PathVariable Long orderId) {
+    public ResponseEntity<BusinessResponse<OrderDetailResponse>> getOrderDetails(@PathVariable("orderId") Long orderId) {
         OrderDetailResponse orderDetailResponse = orderService.getOrderDetails(orderId);
         return ResponseEntity.ok(BusinessResponse.success(SuccessCode.ORDER_DETAILS_FETCHED,orderDetailResponse));
     }

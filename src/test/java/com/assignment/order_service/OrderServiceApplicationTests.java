@@ -1,10 +1,7 @@
 package com.assignment.order_service;
 
 import com.assignment.order_service.domain.repository.ProductRepository;
-import com.assignment.order_service.dto.CancelRequest;
-import com.assignment.order_service.dto.CancelResponse;
-import com.assignment.order_service.dto.OrderRequest;
-import com.assignment.order_service.dto.OrderResponse;
+import com.assignment.order_service.dto.*;
 import com.assignment.order_service.exception.BusinessException;
 import com.assignment.order_service.exception.ErrorCode;
 import com.assignment.order_service.service.OrderService;
@@ -280,5 +277,55 @@ public class OrderServiceApplicationTests {
 		assertThatThrownBy(() -> orderService.cancelOrderItem(orderId, cancelRequest))
 				.isInstanceOf(BusinessException.class)
 				.hasMessageContaining(ErrorCode.ALREADY_CANCELLED.getMessage());
+	}
+
+	// ******************************************** 주문 상품 조회 ***************************************************
+
+	@Test
+	@DisplayName("주문 상세 조회 - 정상 조회")
+	void getOrderDetails_success() {
+		// given
+		// 이마트 생수 2개, 신라면 멀티팩 1개 주문.
+		OrderRequest request = new OrderRequest(List.of(
+				new OrderRequest.Item(1000000001L, 2),
+				new OrderRequest.Item(1000000002L, 1)
+		));
+		// 주문 생성
+		OrderResponse createdOrder = orderService.createOrder(request);
+		Long orderId = createdOrder.getOrderId();
+
+		// when
+		// 생성된 주문 아이디로 상세내용 받아오기.
+		OrderDetailResponse detailResponse = orderService.getOrderDetails(orderId);
+
+		// then
+		// 주문 아이디, 상품 리스트 같은지 확인.
+		assertThat(detailResponse.getOrderId()).isEqualTo(orderId);
+		assertThat(detailResponse.getItems()).hasSize(2);
+
+		assertThat(detailResponse.getItems())
+				.anySatisfy(i -> {
+					assertThat(i.getProductId()).isEqualTo(1000000001L);
+					assertThat(i.getQuantity()).isEqualTo(2);
+				})
+				.anySatisfy(i -> {
+					assertThat(i.getProductId()).isEqualTo(1000000002L);
+					assertThat(i.getQuantity()).isEqualTo(1);
+				});
+
+		assertThat(detailResponse.getTotalPrice()).isGreaterThan(0);
+	}
+
+	@Test
+	@DisplayName("주문 상세 조회 실패 - 존재하지 않는 주문 ID")
+	void getOrderDetails_orderNotFound_exception() {
+		// given
+		Long invalidOrderId = 999999L;
+
+		// when & then
+		// 주문 조회 실패 예외처리.
+		assertThatThrownBy(() -> orderService.getOrderDetails(invalidOrderId))
+				.isInstanceOf(BusinessException.class)
+				.hasMessageContaining(ErrorCode.ORDER_NOT_FOUND.getMessage());
 	}
 }

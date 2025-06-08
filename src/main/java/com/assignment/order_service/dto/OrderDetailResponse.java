@@ -12,7 +12,7 @@ import java.util.List;
 public class OrderDetailResponse {
     private Long orderId;
     private List<ItemDetail> items;
-    private int totalAmount;
+    private int totalPrice;
 
     @Getter @Setter
     @AllArgsConstructor
