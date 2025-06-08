@@ -36,10 +36,15 @@ public class OrderServiceImpl implements OrderService {
         // 전체 주문 금액.
         int orderTotalPrice = 0;
 
+        // 요청 상품이 없으면 예외
+        if (request.getItems() == null || request.getItems().isEmpty()) {
+            throw new BusinessException(ErrorCode.EMPTY_ORDER_ITEMS);
+        }
+
         // 요청 상품 리스트 순회하면서 orderItem 객체 생성.
         for (OrderRequest.Item item : request.getItems()) {
             // 상품 정보를 가져온다. 존재하지 않는 상품은 예외 처리.
-            Product product = productRepository.findById(item.getProductId())
+            Product product = productRepository.findByIdForUpdate(item.getProductId())
                     .orElseThrow(()->new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
 
             // 재고 부족 예외 처리
@@ -114,7 +119,7 @@ public class OrderServiceImpl implements OrderService {
 
         // 주문 항목 조회
         OrderItem orderItem = order.getOrderItems().stream()
-                .filter(i -> i.getId().equals(cancelRequest.getProductId()))
+                .filter(i -> i.getProduct().getId().equals(cancelRequest.getProductId()))
                 .findFirst()
                 .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
 

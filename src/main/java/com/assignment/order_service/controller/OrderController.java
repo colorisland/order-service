@@ -41,8 +41,9 @@ public class OrderController {
      * @return
      */
     @PostMapping("/{orderId}/cancel")
+    @Operation(summary = "주문 상품 개별 취소", description = "주문번호, 상품 아이디를 받아 개별적으로 주문을 취소합니다.")
     public ResponseEntity<BusinessResponse<CancelResponse>> cancelOrderItem(
-            @PathVariable Long orderId,
+            @PathVariable("orderId") Long orderId,
             @RequestBody @Valid CancelRequest cancelRequest) {
         CancelResponse cancelResponse = orderService.cancelOrderItem(orderId, cancelRequest);
         return ResponseEntity.ok(BusinessResponse.success(SuccessCode.ORDER_CANCELLED,cancelResponse));
