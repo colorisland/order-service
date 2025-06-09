@@ -111,24 +111,41 @@ com.assignment.order_service
 ## API
 ### 주문 생성 API
 ```mermaid
-graph TD;
-    A[Client] --> B[POST /api/orders]
-    B --> C[OrderService.createOrder(request)]
-    C --> D[상품 ID로 Product 조회]
-    D --> E{재고 수량 ≥ 요청 수량?}
-    E -- No --> F[BusinessException: INSUFFICIENT_STOCK]
-    E -- Yes --> G[재고 차감]
-    G --> H[할인 금액 계산]
-    H --> I[OrderItem 객체 생성]
-    I --> J[Order 객체 생성 및 연관관계 설정]
-    J --> K[OrderRepository.save()]
-    K --> L[OrderResponse DTO 구성]
-    L --> M[응답 반환]
+graph TD; 
+B[상품 ID로 Product 조회]
+B --> A{유효한 상품 아이디?}
+A -- No --> C[PRODUCT_NOT_FOUND 예외]
+A -- Yes --> E{재고 수량 ≥ 요청 수량 인지 확인}
+E -- No --> F[INSUFFICIENT_STOCK 예외]
+E -- Yes --> G[재고 차감]
+G --> H[할인 금액 계산]
+H --> K[주문생성 성공]
 ```
 ### 주문 상품 개별 취소 API
-...
+```mermaid
+graph TD
+D[주문 ID로 Order 조회]
+D --> E{주문에 해당 상품이 포함되어 있는지 확인}
+E -- No --> F[PRODUCT_NOT_FOUND 예외]
+E -- Yes --> G{이미 취소된 상품인지 확인}
+G -- Yes --> H[ALREADY_CANCELLED 예외]
+G -- No --> I[isCancelled = true 설정]
+I --> J[상품 재고 복구]
+J --> K[환불 금액 계산]
+K --> L[남은 주문 금액 계산]
+L --> M[개별 취소 성공]
+```
 ### 주문 상품 조회 API
-...
+```mermaid
+graph TD;
+D[주문 ID로 Order 조회]
+D --> A{주문 존재 여부 확인}
+A -- No --> B[ORDER_NOT_FOUND 예외]
+A -- Yes --> E[주문에 포함된 주문 항목 목록 순회]
+E --> F[ItemDetail DTO로 매핑]
+F --> G[취소되지 않은 항목만 골라 총 금액 계산]
+G --> H[주문 상품 조회 성공]
+```
 ## Testing Strategy 
 프레임워크로 JUnit5 사용했으며 가독성이 좋은 AssertJ (Assertions.assertThat) 라이브러리를 사용했습니다.
 
