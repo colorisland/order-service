@@ -66,6 +66,26 @@ com.assignment.order_service
 └── OrderServiceApplication.java
 
 ```
+### 네이밍 규칙
++ 서비스 메서드 이름 규칙: 카멜케이스 사용, 동사형으로 이름 짓기
++ 테스트 메서드 이름 규칙: 스네이크케이스 사용, 기능_결과 형식으로 이름 짓기
++ DTO 클래스 이름 규칙: Request, Response 접미사 붙여서 구분.
+
+### 공통 응답 처리 및 예외 처리
+클라이언트에서 HTTP Status Code 만으로 비즈니스 로직을 처리하는 데 한계가 있습니다.
+그래서 클라이언트가 비즈니스 성공/실패 응답을 일관되게 받을 수 있도록 BusinessResponse 구조를 정의했습니다.
+예외 처리 시 @RestControllerAdvice 에서 받아서 BusinessResponse 형태로 리턴합니다.
+비즈니스 코드는 Enum 으로 관리되며 
+성공/실패 응답 모두 아래와 같은 body 로 응답됩니다.
+```
+{
+  "data": {
+    "resultCode": "SUCCESS_CODE or ERROR_CODE",
+    "resultMessage": "응답 메시지",
+    "resultData": { ... }
+  }
+}
+```
 ### ERD & 도메인 설계
 ![ERD.png](ERD.png)
 주문 관련 테이블은 DELETE 연산을 수행하지 않는다.
@@ -90,10 +110,17 @@ com.assignment.order_service
 
 ## API
 ### 주문 생성 API
-...
+```mermaid
+graph TD;
+    A-->B;
+    A-->C;
+    B-->D;
+    C-->D;
+```
 ### 주문 상품 개별 취소 API
 ...
 ### 주문 상품 조회 API
 ...
+## Testing Strategy 
+프레임워크로 JUnit5 사용했으며 가독성이 좋은 AssertJ (Assertions.assertThat) 라이브러리를 사용했습니다.
 
-## Manual
