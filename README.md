@@ -112,10 +112,18 @@ com.assignment.order_service
 ### 주문 생성 API
 ```mermaid
 graph TD;
-    A-->B;
-    A-->C;
-    B-->D;
-    C-->D;
+    A[Client] --> B[POST /api/orders]
+    B --> C[OrderService.createOrder(request)]
+    C --> D[상품 ID로 Product 조회]
+    D --> E{재고 수량 ≥ 요청 수량?}
+    E -- No --> F[BusinessException: INSUFFICIENT_STOCK]
+    E -- Yes --> G[재고 차감]
+    G --> H[할인 금액 계산]
+    H --> I[OrderItem 객체 생성]
+    I --> J[Order 객체 생성 및 연관관계 설정]
+    J --> K[OrderRepository.save()]
+    K --> L[OrderResponse DTO 구성]
+    L --> M[응답 반환]
 ```
 ### 주문 상품 개별 취소 API
 ...
