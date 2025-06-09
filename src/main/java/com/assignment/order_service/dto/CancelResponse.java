@@ -13,8 +13,8 @@ public class CancelResponse {
     private Long productId;
 
     @Schema(description = "환불 금액")
-    private int refundAmount;
+    private int refundPrice;
 
     @Schema(description = "취소 후 남은 금액")
-    private int remainingAmount;
+    private int remainingPrice;
 }

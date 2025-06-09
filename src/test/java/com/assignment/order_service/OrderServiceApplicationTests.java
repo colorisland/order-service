@@ -211,8 +211,8 @@ public class OrderServiceApplicationTests {
 		CancelResponse cancelResponse = orderService.cancelOrderItem(orderId, cancelRequest);
 
 		// then
-		assertThat(cancelResponse.getRefundAmount()).isGreaterThan(0);
-		assertThat(cancelResponse.getRemainingAmount()).isEqualTo(0);
+		assertThat(cancelResponse.getRefundPrice()).isGreaterThan(0);
+		assertThat(cancelResponse.getRemainingPrice()).isEqualTo(0);
 	}
 
 	@Test
@@ -271,7 +271,7 @@ public class OrderServiceApplicationTests {
 		// 1차 취소 성공
 		CancelResponse cancelResponse = orderService.cancelOrderItem(orderId, cancelRequest);
 		assertThat(cancelResponse).isNotNull();
-		assertThat(cancelResponse.getRefundAmount()).isGreaterThan(0);
+		assertThat(cancelResponse.getRefundPrice()).isGreaterThan(0);
 
 		// 2차 중복 취소
 		assertThatThrownBy(() -> orderService.cancelOrderItem(orderId, cancelRequest))

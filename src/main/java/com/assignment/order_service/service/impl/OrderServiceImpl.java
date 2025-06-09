@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -136,13 +137,13 @@ public class OrderServiceImpl implements OrderService {
         product.setStockQuantity(product.getStockQuantity() + orderItem.getQuantity());
 
         // 총 주문 금액에서 환불 금액 차감
-        int refundAmount = orderItem.getTotalPrice();
-        int remainingTotal = order.getOrderItems().stream()
+        int refundPrice = orderItem.getTotalPrice();
+        int remainingPrice = order.getOrderItems().stream()
                 .filter(i -> !i.isCancelled())
                 .mapToInt(OrderItem::getTotalPrice)
                 .sum();
 
-        return new CancelResponse(orderItem.getId(), refundAmount, remainingTotal);
+        return new CancelResponse(orderItem.getId(), refundPrice, remainingPrice);
     }
 
     @Override
@@ -152,19 +153,27 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
 
         List<OrderDetailResponse.ItemDetail> items = order.getOrderItems().stream()
-                .map(i -> new OrderDetailResponse.ItemDetail(
-                        i.getProduct().getId(),
-                        i.getQuantity(),
-                        i.getTotalDiscountedPrice(),
-                        i.isCancelled()
-                ))
+                .map(i -> {
+                    Product p = i.getProduct();
+                    return new OrderDetailResponse.ItemDetail(
+                            p.getId(),
+                            p.getName(),
+                            i.getQuantity(),
+                            i.getTotalDiscountedPrice(),
+                            i.getTotalPrice(),
+                            i.isCancelled()
+                    );
+                })
                 .toList();
 
-        int totalAmount = order.getOrderItems().stream()
+        int totalPrice = order.getOrderItems().stream()
                 .filter(i -> !i.isCancelled())
                 .mapToInt(OrderItem::getTotalPrice)
                 .sum();
 
-        return new OrderDetailResponse(orderId,items, totalAmount);
+        // 날짜 포맷팅
+        String formattedDate = order.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
+
+        return new OrderDetailResponse(orderId,formattedDate, items, totalPrice);
     }
 }
