@@ -1,5 +1,7 @@
 package com.assignment.order_service;
 
+import com.assignment.order_service.domain.OrderFailureLog;
+import com.assignment.order_service.domain.repository.OrderFailureLogRepository;
 import com.assignment.order_service.domain.repository.ProductRepository;
 import com.assignment.order_service.dto.*;
 import com.assignment.order_service.exception.BusinessException;
@@ -32,6 +34,9 @@ public class OrderServiceApplicationTests {
 
 	@Autowired
 	private ProductRepository productRepository;
+
+	@Autowired
+	private OrderFailureLogRepository orderFailureLogRepository;
 
 	// ******************************************** 주문 생성 ***************************************************
 
@@ -190,6 +195,28 @@ public class OrderServiceApplicationTests {
 		assertThatThrownBy(() -> orderService.createOrder(request))
 				.isInstanceOf(BusinessException.class)
 				.hasMessageContaining(ErrorCode.EMPTY_ORDER_ITEMS.getMessage());
+	}
+
+	@Test
+	@DisplayName("이미 취소된 상품 재취소 시 ALREADY_CANCELLED 예외 발생")
+	void createOrder_insertOrderFailureLog() {
+		// given: 존재하지 않는 상품 ID
+		Long invalidProductId = 9999999999L;
+		OrderRequest request = new OrderRequest(
+				List.of(new OrderRequest.Item(invalidProductId, 1))
+		);
+
+		// when: 주문 요청 → 예외 발생 예상
+		assertThatThrownBy(() -> orderService.createOrder(request))
+				.isInstanceOf(BusinessException.class);
+
+		// then: 실패 로그가 남았는지 확인
+		List<OrderFailureLog> logs = orderFailureLogRepository.findAll();
+		assertThat(logs).isNotEmpty();
+
+		OrderFailureLog lastLog = logs.get(logs.size() - 1);
+		assertThat(lastLog.getProductIds()).contains(invalidProductId.toString());
+		assertThat(lastLog.getErrorCode()).isEqualTo("PRODUCT_NOT_FOUND");
 	}
 
 	// ******************************************** 주문 상품 개별 취소 ***************************************************

@@ -8,6 +8,7 @@ import com.assignment.order_service.domain.repository.ProductRepository;
 import com.assignment.order_service.dto.*;
 import com.assignment.order_service.exception.BusinessException;
 import com.assignment.order_service.enums.ErrorCode;
+import com.assignment.order_service.service.OrderFailureLogService;
 import com.assignment.order_service.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
+    private final OrderFailureLogService orderFailureLogService;
+
     private final ProductRepository productRepository;
     private final OrderRepository orderRepository;
 
@@ -36,73 +39,78 @@ public class OrderServiceImpl implements OrderService {
 
         // 전체 주문 금액.
         int orderTotalPrice = 0;
+        try {
 
-        // 요청 상품이 없으면 예외
-        if (request.getItems() == null || request.getItems().isEmpty()) {
-            throw new BusinessException(ErrorCode.EMPTY_ORDER_ITEMS);
-        }
-
-        // 요청 상품 리스트 순회하면서 orderItem 객체 생성.
-        for (OrderRequest.Item item : request.getItems()) {
-            // 상품 정보를 가져온다. 존재하지 않는 상품은 예외 처리.
-            Product product = productRepository.findByIdForUpdate(item.getProductId())
-                    .orElseThrow(()->new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
-
-            // 재고 부족 예외 처리
-            if (product.getStockQuantity() < item.getQuantity()) {
-                throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
+            // 요청 상품이 없으면 예외
+            if (request.getItems() == null || request.getItems().isEmpty()) {
+                throw new BusinessException(ErrorCode.EMPTY_ORDER_ITEMS);
             }
 
-            // 재고 차감
-            product.setStockQuantity(product.getStockQuantity() - item.getQuantity());
+            // 요청 상품 리스트 순회하면서 orderItem 객체 생성.
+            for (OrderRequest.Item item : request.getItems()) {
+                // 상품 정보를 가져온다. 존재하지 않는 상품은 예외 처리.
+                Product product = productRepository.findByIdForUpdate(item.getProductId())
+                        .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
 
-            // 할인가 계산
-            int discountedPrice = product.getPrice() - product.getDiscountAmount();
+                // 재고 부족 예외 처리
+                if (product.getStockQuantity() < item.getQuantity()) {
+                    throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
+                }
 
-            // 전체 할인가 계산
-            int totalDiscountedPrice = discountedPrice * item.getQuantity();
+                // 재고 차감
+                product.setStockQuantity(product.getStockQuantity() - item.getQuantity());
 
-            // 해당 상품의 할인적용 안된 판매가격으로 계산.
-            int totalPrice = product.getPrice() * item.getQuantity();
+                // 할인가 계산
+                int discountedPrice = product.getPrice() - product.getDiscountAmount();
 
-            // 주문 아이템 생성.
-            OrderItem orderItem = OrderItem.builder()
-                    .product(product) // 상품 관계 설정.
-                    .quantity(item.getQuantity())
-                    .totalDiscountedPrice(totalDiscountedPrice)
-                    .totalPrice(totalPrice)
-                    .isCancelled(false)
+                // 전체 할인가 계산
+                int totalDiscountedPrice = discountedPrice * item.getQuantity();
+
+                // 해당 상품의 할인적용 안된 판매가격으로 계산.
+                int totalPrice = product.getPrice() * item.getQuantity();
+
+                // 주문 아이템 생성.
+                OrderItem orderItem = OrderItem.builder()
+                        .product(product) // 상품 관계 설정.
+                        .quantity(item.getQuantity())
+                        .totalDiscountedPrice(totalDiscountedPrice)
+                        .totalPrice(totalPrice)
+                        .isCancelled(false)
+                        .build();
+
+                // orderItems 에 추가.
+                orderItems.add(orderItem);
+                orderTotalPrice += totalPrice;
+            }
+
+            // 주문 객체 설정.
+            Order order = Order.builder()
+                    .createdAt(LocalDateTime.now())
+                    .orderItems(orderItems)
                     .build();
 
-            // orderItems 에 추가.
-            orderItems.add(orderItem);
-            orderTotalPrice += totalPrice;
+            // 주문 아이템에 주문 설정.
+            for (OrderItem item : orderItems) {
+                item.setOrder(order);  // 양방향 연관관계 설정
+            }
+
+            // 주문, 주문아이템 생성하고 결과 반환.
+            Order savedOrder = orderRepository.save(order);
+
+            // Response DTO 설정
+            List<OrderResponse.Item> responseItems = orderItems.stream()
+                    .map(i -> new OrderResponse.Item(
+                            i.getProduct().getId(),
+                            i.getQuantity(),
+                            i.getTotalDiscountedPrice(),
+                            i.getTotalPrice()))
+                    .toList();
+
+            return new OrderResponse(savedOrder.getId(), responseItems, orderTotalPrice);
+        } catch (BusinessException e) {
+            orderFailureLogService.insertOrderFailureLog(request, e.getErrorCode(), e.getMessage());
+            throw e;
         }
-
-        // 주문 객체 설정.
-        Order order = Order.builder()
-                .createdAt(LocalDateTime.now())
-                .orderItems(orderItems)
-                .build();
-
-        // 주문 아이템에 주문 설정.
-        for (OrderItem item : orderItems) {
-            item.setOrder(order);  // 양방향 연관관계 설정
-        }
-
-        // 주문, 주문아이템 생성하고 결과 반환.
-        Order savedOrder = orderRepository.save(order);
-
-        // Response DTO 설정
-        List<OrderResponse.Item> responseItems = orderItems.stream()
-                .map(i -> new OrderResponse.Item(
-                        i.getProduct().getId(),
-                        i.getQuantity(),
-                        i.getTotalDiscountedPrice(),
-                        i.getTotalPrice()))
-                .toList();
-
-        return new OrderResponse(savedOrder.getId(), responseItems, orderTotalPrice);
     }
 
     /**
