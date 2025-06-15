@@ -52,6 +52,7 @@ public class OrderController {
      * @return
      */
     @GetMapping("/{orderId}")
+    @Operation(summary = "주문 조회", description = "주문 번호를 입력받아 주문 상세를 조회합니다.")
     public ResponseEntity<BusinessResponse<OrderDetailResponse>> getOrderDetails(@PathVariable("orderId") Long orderId) {
         OrderDetailResponse orderDetailResponse = orderService.getOrderDetails(orderId);
         return ResponseEntity.ok(BusinessResponse.success(SuccessCode.ORDER_DETAILS_FETCHED,orderDetailResponse));
