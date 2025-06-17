@@ -151,7 +151,7 @@ public class OrderServiceImpl implements OrderService {
                 .mapToInt(OrderItem::getTotalPrice)
                 .sum();
 
-        return new CancelResponse(orderItem.getId(), refundPrice, remainingPrice);
+        return new CancelResponse(cancelRequest.getProductId(), refundPrice, remainingPrice);
     }
 
     @Override
